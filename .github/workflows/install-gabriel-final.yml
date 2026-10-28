@@ -1,0 +1,39 @@
+name: Instalar Gabriel Barbeiro Final
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/install-gabriel-final.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconstruir pacote final validado
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat gabriel-barbearia/.deploy/part-*.txt | tr -d '\n' | base64 -d > /tmp/gabriel-final.tar.gz
+          tar -xzf /tmp/gabriel-final.tar.gz -C gabriel-barbearia
+          rm -rf gabriel-barbearia/.deploy
+          node --check gabriel-barbearia/api.mjs
+          node --check gabriel-barbearia/validation.mjs
+          node --check gabriel-barbearia/api/gabriel.mjs
+      - name: Publicar arquivos finais no repositório
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A gabriel-barbearia
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração necessária."
+          else
+            git commit -m "Gabriel: instalar versão final v5"
+            git push
+          fi
