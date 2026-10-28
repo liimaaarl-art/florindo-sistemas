@@ -3,68 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#10201c">
+<meta name="theme-color" content="#0b100e">
+<meta name="description" content="Agende seu horário com Gabriel Barbeiro. Escolha o serviço, a data e o melhor horário disponível.">
 <title>Gabriel Barbeiro • Agendamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0d1815;--surface:#13231f;--surface2:#182b26;--line:#2c423a;--gold:#d2b77f;--gold2:#f0d9a8;--text:#f3f4ef;--muted:#afbbb5;--ok:#8fd3af;--warn:#f0ca82;--danger:#e99a94;--radius:20px;--shadow:0 24px 60px rgba(0,0,0,.28)}
-*{box-sizing:border-box}html{color-scheme:dark}body{margin:0;background:radial-gradient(circle at 85% 5%,rgba(210,183,127,.1),transparent 30%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.5}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}.shell{max-width:1080px;margin:auto;padding:24px 18px 70px}.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:stretch;margin:12px 0 24px}.hero-main,.hero-side,.card{background:linear-gradient(145deg,rgba(24,43,38,.98),rgba(17,32,28,.98));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.hero-main{padding:34px}.brand{display:flex;gap:14px;align-items:center}.mark{width:50px;height:50px;border:1px solid rgba(210,183,127,.55);border-radius:16px;display:grid;place-items:center;color:var(--gold2);font-size:25px;background:rgba(210,183,127,.08)}.eyebrow{letter-spacing:.15em;text-transform:uppercase;font-size:11px;color:var(--gold);font-weight:800}h1,h2,h3,p{margin-top:0}h1{font-family:Georgia,serif;font-size:clamp(36px,6vw,64px);line-height:.95;margin:26px 0 16px;color:#fff;font-weight:500}h2{font-family:Georgia,serif;font-weight:500;font-size:28px}.lead{font-size:18px;color:var(--muted);max-width:670px}.hero-side{padding:28px;display:flex;flex-direction:column;justify-content:center}.notice{border:1px solid rgba(240,202,130,.45);background:rgba(240,202,130,.08);padding:18px;border-radius:16px;color:#f6e7c8}.notice strong{display:block;color:var(--gold2);font-size:16px;margin-bottom:6px}.steps{margin-top:18px;display:grid;gap:11px}.step{display:flex;gap:11px;color:var(--muted);font-size:14px}.step b{flex:0 0 26px;height:26px;border-radius:50%;background:rgba(210,183,127,.13);color:var(--gold2);display:grid;place-items:center}.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:22px}.card{padding:28px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}label{display:block;font-size:13px;font-weight:700;color:#d7ddd9;margin-bottom:7px}input,select,textarea{width:100%;background:#0e1b18;color:var(--text);border:1px solid #385047;border-radius:12px;padding:13px 14px;outline:none}input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(210,183,127,.1)}textarea{min-height:95px;resize:vertical}.money-box{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.money-item{background:#0f1d19;border:1px solid var(--line);padding:15px;border-radius:14px}.money-item span{display:block;color:var(--muted);font-size:12px}.money-item b{display:block;font-size:22px;margin-top:4px}.money-item.signal{border-color:rgba(210,183,127,.55)}.money-item.signal b{color:var(--gold2)}.pix{display:flex;gap:10px;align-items:center;background:#0e1b18;border:1px dashed #52675f;padding:13px;border-radius:12px;margin-bottom:16px}.pix code{overflow-wrap:anywhere;flex:1;color:#e7e9e4}.btn{border:0;border-radius:12px;padding:14px 18px;font-weight:800}.btn-primary{background:var(--gold);color:#10201c;width:100%}.btn-secondary{background:#223831;color:#fff;border:1px solid #435c53}.btn:disabled{opacity:.45;cursor:not-allowed}.rules{display:grid;gap:12px}.rule{padding:14px 0;border-bottom:1px solid var(--line)}.rule:last-child{border-bottom:0}.rule b{display:block;margin-bottom:3px}.rule span{color:var(--muted);font-size:14px}.times{display:flex;flex-wrap:wrap;gap:8px}.time{background:#10201c;border:1px solid #3b5149;color:#e7ebe8;padding:10px 12px;border-radius:10px;min-width:73px}.time.selected{background:var(--gold);border-color:var(--gold);color:#0d1815;font-weight:900}.time:disabled{opacity:.25;text-decoration:line-through}.check{display:flex;gap:10px;align-items:flex-start;background:#0e1b18;border:1px solid var(--line);padding:14px;border-radius:12px}.check input{width:auto;margin-top:4px}.check span{font-size:13px;color:var(--muted)}.status{margin-top:14px;font-size:14px;color:var(--muted);min-height:22px}.error{color:var(--danger)}.success{display:none;padding:28px;border:1px solid rgba(143,211,175,.4);background:rgba(143,211,175,.08);border-radius:18px}.success.show{display:block}.success h2{color:#dff7e9}.success .big{font-size:18px;color:#fff}.whatsapp{display:inline-block;margin-top:15px;background:#1e8d59;color:white;text-decoration:none;padding:13px 16px;border-radius:11px;font-weight:800}.footer{text-align:center;color:#7f9189;font-size:12px;margin-top:34px}.loading{opacity:.6;pointer-events:none}@media(max-width:800px){.hero,.grid{grid-template-columns:1fr}.hero-main,.hero-side,.card{padding:22px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.money-box{grid-template-columns:1fr}h1{font-size:43px}.shell{padding:12px 12px 50px}}
+:root{--bg:#0a0f0d;--surface:#111815;--surface2:#16201b;--line:rgba(255,255,255,.11);--gold:#c9a96d;--gold2:#ead7ad;--text:#f7f5ef;--muted:#a9b2ad;--ok:#88d3aa;--warn:#e7c17a;--danger:#e89a94;--radius:24px;--shadow:0 30px 90px rgba(0,0,0,.38);--serif:'Cormorant Garamond',Georgia,serif;--sans:'Manrope',Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth;color-scheme:dark}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.55;overflow-x:hidden}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}.eyebrow{letter-spacing:.18em;text-transform:uppercase;font-size:10px;color:var(--gold2);font-weight:800}h1,h2,h3,p{margin-top:0}.site-header{position:absolute;z-index:20;left:0;right:0;top:0}.nav{max-width:1180px;margin:auto;padding:24px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:12px;text-decoration:none}.mark{width:46px;height:46px;border:1px solid rgba(234,215,173,.5);border-radius:50%;display:grid;place-items:center;background:rgba(8,14,11,.5);backdrop-filter:blur(10px);font-size:21px;color:var(--gold2)}.brand-copy{display:grid;line-height:1.1}.brand-copy strong{font-family:var(--serif);font-size:22px;font-weight:700}.brand-copy span{font-size:9px;letter-spacing:.18em;color:#d7d7d2;text-transform:uppercase;margin-top:4px}.nav-cta{border:1px solid rgba(234,215,173,.55);background:rgba(11,17,14,.42);backdrop-filter:blur(12px);text-decoration:none;padding:11px 17px;border-radius:999px;font-size:12px;font-weight:800;transition:.2s}.nav-cta:hover{background:var(--gold);color:#111712;border-color:var(--gold)}
+.hero{position:relative;min-height:92svh;display:flex;align-items:flex-end;background-image:linear-gradient(90deg,rgba(5,9,7,.92) 0%,rgba(7,11,9,.72) 42%,rgba(7,11,9,.28) 72%,rgba(5,9,7,.5) 100%),linear-gradient(0deg,#0a0f0d 0%,transparent 32%),url('https://images.unsplash.com/photo-1517869129960-b9b74bfcdecb?auto=format&fit=crop&w=2400&q=88');background-size:cover;background-position:center 48%;isolation:isolate}.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 72% 28%,rgba(201,169,109,.18),transparent 28%)}.hero-wrap{width:100%;max-width:1180px;margin:auto;padding:160px 22px 88px}.hero-content{max-width:730px}.hero-kicker{display:inline-flex;align-items:center;gap:9px;background:rgba(12,19,15,.55);border:1px solid rgba(255,255,255,.13);backdrop-filter:blur(12px);padding:8px 12px;border-radius:999px;color:#e4e6e2;font-size:11px;font-weight:700}.hero-kicker i{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 18px var(--gold)}h1{font-family:var(--serif);font-weight:600;font-size:clamp(58px,8.5vw,108px);line-height:.84;letter-spacing:-.035em;margin:26px 0 26px;max-width:860px}.hero-lead{max-width:610px;color:#d1d5d1;font-size:clamp(16px,2vw,20px);line-height:1.7}.hero-actions{display:flex;gap:11px;align-items:center;flex-wrap:wrap;margin-top:31px}.hero-button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:999px;padding:15px 22px;font-size:13px;font-weight:800;transition:.2s}.hero-button.primary{background:var(--gold);color:#101510}.hero-button.primary:hover{transform:translateY(-2px);background:var(--gold2)}.hero-button.secondary{border:1px solid rgba(255,255,255,.22);background:rgba(12,18,15,.45);backdrop-filter:blur(12px);color:#f2f2ed}.hero-meta{display:flex;gap:26px;flex-wrap:wrap;margin-top:43px;padding-top:23px;border-top:1px solid rgba(255,255,255,.14);max-width:650px}.hero-meta div{display:grid;gap:3px}.hero-meta b{font-size:13px;color:#fff}.hero-meta span{font-size:11px;color:#b0bbb5}.scroll-cue{position:absolute;right:max(22px,calc((100vw - 1180px)/2 + 22px));bottom:42px;writing-mode:vertical-rl;text-transform:uppercase;letter-spacing:.2em;color:#9ea7a2;font-size:8px;display:flex;align-items:center;gap:10px}.scroll-cue::after{content:"";height:58px;width:1px;background:linear-gradient(var(--gold),transparent)}
+.trust-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#0e1512}.trust{max-width:1180px;margin:auto;padding:25px 22px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px}.trust-item{padding:7px 30px;border-right:1px solid var(--line);display:flex;gap:13px;align-items:flex-start}.trust-item:first-child{padding-left:0}.trust-item:last-child{border-right:0}.trust-icon{width:32px;height:32px;border-radius:50%;border:1px solid rgba(201,169,109,.4);display:grid;place-items:center;color:var(--gold2);flex:0 0 32px;font-size:13px}.trust-item b{display:block;font-size:12px}.trust-item span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.booking-section{position:relative;padding:92px 22px 110px;background:radial-gradient(circle at 0 20%,rgba(201,169,109,.06),transparent 28%),linear-gradient(180deg,#0a0f0d,#0c1210)}.booking-wrap{max-width:1180px;margin:auto}.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:38px}.section-head h2{font-family:var(--serif);font-size:clamp(42px,6vw,68px);font-weight:600;line-height:.94;margin:8px 0 0;letter-spacing:-.025em}.section-head p{max-width:430px;margin:0;color:var(--muted);font-size:13px}.booking-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(290px,.65fr);gap:20px;align-items:start}.card{background:linear-gradient(145deg,rgba(22,32,27,.98),rgba(14,21,18,.98));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.form-card{padding:33px}.side-card{padding:28px;position:sticky;top:18px}.card-title{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:26px}.card-title h3{font-family:var(--serif);font-size:34px;font-weight:600;margin:3px 0 0}.number{width:38px;height:38px;border-radius:50%;border:1px solid rgba(201,169,109,.42);display:grid;place-items:center;color:var(--gold2);font-family:var(--serif);font-size:20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px}.full{grid-column:1/-1}label{display:block;font-size:11px;font-weight:800;color:#dfe3df;margin-bottom:7px;letter-spacing:.02em}input,select,textarea{width:100%;background:#0b1210;color:var(--text);border:1px solid #304139;border-radius:14px;padding:14px 15px;outline:none;transition:.18s}input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,109,.09)}textarea{min-height:95px;resize:vertical}.times{display:flex;flex-wrap:wrap;gap:8px;padding-top:1px}.time{background:#0b1210;border:1px solid #304139;color:#e8ebe8;padding:10px 12px;border-radius:11px;min-width:72px;font-size:12px;transition:.18s}.time:hover:not(:disabled){border-color:var(--gold);color:var(--gold2)}.time.selected{background:var(--gold);border-color:var(--gold);color:#101510;font-weight:900}.time:disabled{opacity:.24;text-decoration:line-through;cursor:not-allowed}.money-box{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0 14px}.money-item{background:#0b1210;border:1px solid var(--line);padding:15px 17px;border-radius:15px}.money-item span{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}.money-item b{display:block;font-family:var(--serif);font-size:27px;margin-top:3px}.money-item.signal{border-color:rgba(201,169,109,.5);background:linear-gradient(145deg,rgba(201,169,109,.11),rgba(11,18,16,.9))}.money-item.signal b{color:var(--gold2)}.pix{display:flex;gap:10px;align-items:center;background:#0b1210;border:1px dashed #4b6057;padding:13px;border-radius:13px;margin-bottom:14px}.pix code{overflow-wrap:anywhere;flex:1;color:#e7e9e4;font-size:12px}.btn{border:0;border-radius:13px;padding:14px 18px;font-weight:800}.btn-primary{background:var(--gold);color:#111712;width:100%;transition:.18s}.btn-primary:hover{background:var(--gold2);transform:translateY(-1px)}.btn-secondary{background:#1b2823;color:#fff;border:1px solid #40544b}.btn:disabled{opacity:.45;cursor:not-allowed}.check{display:flex;gap:10px;align-items:flex-start;background:#0b1210;border:1px solid var(--line);padding:14px;border-radius:13px}.check input{width:auto;margin-top:4px}.check span{font-size:11px;color:var(--muted);line-height:1.55}.status{margin-top:13px;font-size:12px;color:var(--muted);min-height:20px}.error{color:var(--danger)}.success{display:none;padding:28px;border:1px solid rgba(136,211,170,.38);background:rgba(136,211,170,.07);border-radius:18px}.success.show{display:block}.success h2{font-family:var(--serif);font-size:38px;font-weight:600;color:#e3f7eb}.success .big{font-size:15px;color:#fff}.whatsapp{display:inline-block;margin-top:15px;background:#1e8d59;color:white;text-decoration:none;padding:13px 16px;border-radius:11px;font-weight:800;font-size:12px}.notice{border:1px solid rgba(231,193,122,.38);background:rgba(231,193,122,.07);padding:17px;border-radius:15px;color:#e8dcc3;font-size:12px;line-height:1.65}.notice strong{display:block;color:var(--gold2);font-size:13px;margin-bottom:5px}.steps{margin:21px 0 25px;display:grid;gap:15px}.step{display:grid;grid-template-columns:30px 1fr;gap:12px;color:var(--muted);font-size:12px;align-items:start}.step b{height:30px;border-radius:50%;background:rgba(201,169,109,.1);border:1px solid rgba(201,169,109,.27);color:var(--gold2);display:grid;place-items:center}.step strong{display:block;color:#f1f3ef;font-size:12px;margin-bottom:2px}.rules-title{font-family:var(--serif);font-size:27px;margin:4px 0 11px}.rules{display:grid;gap:0}.rule{padding:12px 0;border-bottom:1px solid var(--line)}.rule:last-child{border-bottom:0}.rule b{display:block;margin-bottom:3px;font-size:11px}.rule span{color:var(--muted);font-size:11px;line-height:1.55}.business-info{margin:16px 0 0;color:var(--muted);font-size:11px;white-space:pre-wrap}
+.site-footer{border-top:1px solid var(--line);background:#080d0b}.footer-wrap{max-width:1180px;margin:auto;padding:27px 22px;display:flex;justify-content:space-between;gap:20px;align-items:center;color:#718079;font-size:10px}.footer-brand{font-family:var(--serif);font-size:18px;color:#d4d7d3}.photo-credit{color:#65736d;text-decoration:none}.photo-credit:hover{color:#a8b3ad}.loading{opacity:.64;pointer-events:none}
+@media(max-width:900px){.hero{min-height:88svh;background-position:62% center}.hero-wrap{padding-top:145px}.scroll-cue{display:none}.trust{grid-template-columns:1fr}.trust-item{border-right:0;border-bottom:1px solid var(--line);padding:17px 0}.trust-item:last-child{border-bottom:0}.section-head{align-items:flex-start;flex-direction:column}.booking-grid{grid-template-columns:1fr}.side-card{position:static}.footer-wrap{align-items:flex-start;flex-direction:column}.hero-meta{gap:18px}}
+@media(max-width:620px){.nav{padding:17px 14px}.brand-copy strong{font-size:19px}.brand-copy span{font-size:7px}.mark{width:40px;height:40px}.nav-cta{padding:9px 12px;font-size:10px}.hero{min-height:86svh;background-position:66% center}.hero-wrap{padding:125px 16px 62px}.hero-content{max-width:100%}h1{font-size:57px;line-height:.88}.hero-lead{font-size:14px;max-width:92%}.hero-actions{margin-top:23px}.hero-button{width:100%;padding:14px 18px}.hero-meta{margin-top:30px;padding-top:18px;display:grid;grid-template-columns:1fr 1fr}.trust{padding:10px 16px}.booking-section{padding:64px 12px 76px}.section-head{margin-bottom:25px;padding:0 4px}.section-head h2{font-size:45px}.form-card,.side-card{padding:20px 16px;border-radius:19px}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.money-box{grid-template-columns:1fr}.card-title h3{font-size:30px}.times{gap:7px}.time{min-width:65px;padding:9px 10px}.footer-wrap{padding:23px 16px}.photo-credit{display:none}}
 </style>
 </head>
 <body>
-<div class="shell" id="app">
+<header class="site-header">
+  <nav class="nav">
+    <a class="brand" href="#top" aria-label="Gabriel Barbeiro">
+      <div class="mark">✂</div>
+      <div class="brand-copy"><strong id="businessTop">Gabriel Barbeiro</strong><span>Seu tempo. Seu estilo.</span></div>
+    </a>
+    <a class="nav-cta" href="#agendar">Agendar horário</a>
+  </nav>
+</header>
+
+<main id="top">
   <section class="hero">
-    <div class="hero-main">
-      <div class="brand"><div class="mark">✂</div><div><div class="eyebrow">Agendamento online</div><strong id="businessTop">Gabriel Barbeiro</strong></div></div>
-      <h1>Seu horário.<br>Sem complicação.</h1>
-      <p class="lead">Escolha o serviço e um horário disponível. O pedido entra como <strong>pré-agendamento</strong> e só é confirmado depois da comprovação do sinal.</p>
+    <div class="hero-wrap">
+      <div class="hero-content">
+        <div class="hero-kicker"><i></i> Agendamento online</div>
+        <h1>Seu estilo<br>começa no horário.</h1>
+        <p class="hero-lead">Escolha o serviço, encontre um horário disponível e faça seu pré-agendamento de forma rápida. A confirmação acontece após a comprovação do sinal.</p>
+        <div class="hero-actions">
+          <a class="hero-button primary" href="#agendar">Escolher meu horário</a>
+          <a class="hero-button secondary" href="#como-funciona">Como funciona</a>
+        </div>
+        <div class="hero-meta">
+          <div><b>Agendamento simples</b><span>Escolha data e horário pelo celular.</span></div>
+          <div><b>Confirmação segura</b><span>O horário é confirmado após o sinal.</span></div>
+          <div><b>WhatsApp</b><span>Comprovante e confirmação em um só lugar.</span></div>
+        </div>
+      </div>
     </div>
-    <div class="hero-side">
-      <div class="notice"><strong>Importante antes de escolher o horário</strong>Seu agendamento <b>não fica confirmado apenas ao preencher este formulário</b>. A confirmação acontece somente após a comprovação do pagamento do sinal.</div>
-      <div class="steps"><div class="step"><b>1</b><span>Escolha serviço, data e horário.</span></div><div class="step"><b>2</b><span>Faça o pagamento do sinal indicado.</span></div><div class="step"><b>3</b><span>Envie o comprovante pelo WhatsApp e aguarde a confirmação da barbearia.</span></div></div>
+    <div class="scroll-cue">Role para agendar</div>
+  </section>
+
+  <section class="trust-strip" id="como-funciona">
+    <div class="trust">
+      <div class="trust-item"><div class="trust-icon">01</div><div><b>Escolha o serviço</b><span>Veja o valor e selecione o atendimento.</span></div></div>
+      <div class="trust-item"><div class="trust-icon">02</div><div><b>Selecione o horário</b><span>A página mostra somente horários disponíveis.</span></div></div>
+      <div class="trust-item"><div class="trust-icon">03</div><div><b>Confirme com o sinal</b><span>Envie o comprovante e aguarde a confirmação.</span></div></div>
     </div>
   </section>
 
-  <div class="grid">
-    <section class="card">
-      <div class="eyebrow">Novo pré-agendamento</div>
-      <h2>Escolha seu horário</h2>
-      <form id="bookingForm">
-        <div class="form-grid">
-          <div><label for="name">Seu nome</label><input id="name" autocomplete="name" maxlength="80" required placeholder="Nome completo"></div>
-          <div><label for="phone">WhatsApp com DDD</label><input id="phone" inputmode="tel" autocomplete="tel" maxlength="25" required placeholder="(19) 99999-9999"></div>
-          <div class="full"><label for="service">Serviço</label><select id="service" required><option value="">Carregando serviços…</option></select></div>
-          <div><label for="date">Data</label><input id="date" type="date" required></div>
-          <div><label>Horário</label><div id="times" class="times"><span style="color:var(--muted);font-size:13px">Selecione serviço e data.</span></div><input id="time" type="hidden" required></div>
-          <div class="full"><label for="note">Observação (opcional)</label><textarea id="note" maxlength="300" placeholder="Ex.: alguma observação sobre o atendimento"></textarea></div>
-        </div>
-
-        <div class="money-box">
-          <div class="money-item"><span>Valor do serviço</span><b id="total">—</b></div>
-          <div class="money-item signal"><span>Sinal para confirmar</span><b id="signal">—</b></div>
-        </div>
-        <div id="pixWrap" class="pix" hidden><div><div class="eyebrow">Chave Pix</div><code id="pixValue"></code></div><button class="btn btn-secondary" type="button" id="copyPix">Copiar</button></div>
-        <div class="check"><input id="aware" type="checkbox" required><span id="awareText">Estou ciente de que este pedido é apenas um pré-agendamento e só será confirmado após a barbearia comprovar o recebimento do sinal.</span></div>
-        <button class="btn btn-primary" id="submitBtn" style="margin-top:15px" type="submit">Solicitar pré-agendamento</button>
-        <div id="formStatus" class="status" aria-live="polite"></div>
-      </form>
-      <div id="success" class="success" aria-live="polite"></div>
-    </section>
-
-    <aside class="card">
-      <div class="eyebrow">Regras da barbearia</div>
-      <h2>Para respeitar seu horário e o do próximo cliente</h2>
-      <div class="rules">
-        <div class="rule"><b>Sinal antecipado</b><span id="ruleSignal">O sinal é de 50% do valor do serviço.</span></div>
-        <div class="rule"><b>Confirmação</b><span>O horário só é considerado confirmado após a comprovação do pagamento do sinal.</span></div>
-        <div class="rule"><b>Cancelamento</b><span id="ruleCancel">Avise com pelo menos 4 horas de antecedência.</span></div>
-        <div class="rule"><b>Atraso</b><span id="ruleLate">Há tolerância de 10 minutos.</span></div>
-        <div class="rule"><b>Falta ou cancelamento fora do prazo</b><span>O sinal não é devolvido e poderá haver cobrança do valor restante do horário, conforme a regra da barbearia.</span></div>
+  <section class="booking-section" id="agendar">
+    <div class="booking-wrap">
+      <div class="section-head">
+        <div><div class="eyebrow">Agendamento online</div><h2>Escolha seu horário.</h2></div>
+        <p>Preencha seus dados, escolha o serviço e selecione o melhor horário. O pedido será enviado como pré-agendamento.</p>
       </div>
-      <p id="businessInfo" style="margin-top:20px;color:var(--muted);white-space:pre-wrap"></p>
-    </aside>
-  </div>
-  <div class="footer">Gabriel Barbeiro • Sistema desenvolvido por Florindo Sistemas</div>
-</div>
+
+      <div class="booking-grid">
+        <section class="card form-card">
+          <div class="card-title"><div><div class="eyebrow">Novo pré-agendamento</div><h3>Reserve seu atendimento</h3></div><div class="number">1</div></div>
+          <form id="bookingForm">
+            <div class="form-grid">
+              <div><label for="name">Seu nome</label><input id="name" autocomplete="name" maxlength="80" required placeholder="Nome completo"></div>
+              <div><label for="phone">WhatsApp com DDD</label><input id="phone" inputmode="tel" autocomplete="tel" maxlength="25" required placeholder="(19) 99999-9999"></div>
+              <div class="full"><label for="service">Serviço</label><select id="service" required><option value="">Carregando serviços…</option></select></div>
+              <div><label for="date">Data</label><input id="date" type="date" required></div>
+              <div><label>Horário</label><div id="times" class="times"><span style="color:var(--muted);font-size:11px">Selecione serviço e data.</span></div><input id="time" type="hidden" required></div>
+              <div class="full"><label for="note">Observação (opcional)</label><textarea id="note" maxlength="300" placeholder="Ex.: alguma observação sobre o atendimento"></textarea></div>
+            </div>
+
+            <div class="money-box">
+              <div class="money-item"><span>Valor do serviço</span><b id="total">—</b></div>
+              <div class="money-item signal"><span>Sinal para confirmar</span><b id="signal">—</b></div>
+            </div>
+            <div id="pixWrap" class="pix" hidden><div><div class="eyebrow">Chave Pix</div><code id="pixValue"></code></div><button class="btn btn-secondary" type="button" id="copyPix">Copiar</button></div>
+            <div class="check"><input id="aware" type="checkbox" required><span id="awareText">Estou ciente de que este pedido é apenas um pré-agendamento e só será confirmado após a barbearia comprovar o recebimento do sinal.</span></div>
+            <button class="btn btn-primary" id="submitBtn" style="margin-top:15px" type="submit">Solicitar pré-agendamento</button>
+            <div id="formStatus" class="status" aria-live="polite"></div>
+          </form>
+          <div id="success" class="success" aria-live="polite"></div>
+        </section>
+
+        <aside class="card side-card">
+          <div class="notice"><strong>Seu horário ainda não fica confirmado ao enviar o formulário.</strong>A confirmação acontece somente depois que a barbearia conferir o pagamento do sinal.</div>
+          <div class="steps">
+            <div class="step"><b>1</b><div><strong>Faça o pré-agendamento</strong><span>Escolha serviço, data e horário.</span></div></div>
+            <div class="step"><b>2</b><div><strong>Faça o sinal</strong><span>O valor aparece automaticamente conforme o serviço.</span></div></div>
+            <div class="step"><b>3</b><div><strong>Envie o comprovante</strong><span>Use o botão do WhatsApp após solicitar.</span></div></div>
+          </div>
+          <div class="eyebrow">Regras da barbearia</div>
+          <h3 class="rules-title">Antes de confirmar</h3>
+          <div class="rules">
+            <div class="rule"><b>Sinal antecipado</b><span id="ruleSignal">O sinal é de 50% do valor do serviço.</span></div>
+            <div class="rule"><b>Confirmação</b><span>O horário só é considerado confirmado após a comprovação do pagamento do sinal.</span></div>
+            <div class="rule"><b>Cancelamento</b><span id="ruleCancel">Avise com pelo menos 4 horas de antecedência.</span></div>
+            <div class="rule"><b>Atraso</b><span id="ruleLate">Há tolerância de 10 minutos.</span></div>
+            <div class="rule"><b>Falta ou cancelamento fora do prazo</b><span>O sinal não é devolvido e poderá haver cobrança do valor restante do horário, conforme a regra da barbearia.</span></div>
+          </div>
+          <p id="businessInfo" class="business-info"></p>
+        </aside>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-wrap"><div><div class="footer-brand">Gabriel Barbeiro</div><span>Sistema desenvolvido por Florindo Sistemas</span></div><a class="photo-credit" href="https://unsplash.com/photos/barber-shop-7AFDiiYumkE" target="_blank" rel="noopener">Foto de Ivan Cortez / Unsplash</a></div>
+</footer>
+
 <script>
 'use strict';
 const API=location.origin+'/api/gabriel?path=';
@@ -79,7 +133,7 @@ async function req(path,method='GET',body){const r=await fetch(API+path,{method,
 function serviceObj(){return data?.prices?.find(p=>p.name===$('service').value)}
 function renderMoney(){const p=serviceObj(),pct=data?.rules?.depositPercent||50;if(!p){$('total').textContent=$('signal').textContent='—';$('pixWrap').hidden=true;return}$('total').textContent=money(p.value);$('signal').textContent=money(p.value*pct/100);$('pixValue').textContent=data.business.pix||'Consulte a barbearia';$('pixWrap').hidden=!data.business.pix;$('ruleSignal').textContent=`O sinal é de ${pct}% do valor do serviço (${money(p.value*pct/100)} para este serviço).`;renderTimes()}
 function overlap(start,duration,b){const bs=minute(b.time),be=bs+Number(b.duration||30);return start<be&&bs<start+duration}
-function renderTimes(){const holder=$('times'),p=serviceObj(),date=$('date').value;if(!p||!date){holder.innerHTML='<span style="color:var(--muted);font-size:13px">Selecione serviço e data.</span>';return}selectedTime='';$('time').value='';const r=data.rules||{},start=minute(r.openTime||'08:00'),end=minute(r.closeTime||'20:00'),step=Number(r.slotStep)||30,dur=Number(p.duration)||60,now=new Date(),today=todayKey();let html='';for(let m=start;m+dur<=end;m+=step){const t=clock(m),past=date===today&&(m<=now.getHours()*60+now.getMinutes()),busy=data.busy.some(b=>b.date===date&&overlap(m,dur,b));html+=`<button type="button" class="time" data-time="${t}" ${past||busy?'disabled':''}>${t}</button>`}holder.innerHTML=html||'<span style="color:var(--muted);font-size:13px">Sem horários disponíveis.</span>';holder.querySelectorAll('.time:not(:disabled)').forEach(b=>b.onclick=()=>{holder.querySelectorAll('.time').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');selectedTime=b.dataset.time;$('time').value=selectedTime})}
+function renderTimes(){const holder=$('times'),p=serviceObj(),date=$('date').value;if(!p||!date){holder.innerHTML='<span style="color:var(--muted);font-size:11px">Selecione serviço e data.</span>';return}selectedTime='';$('time').value='';const r=data.rules||{},start=minute(r.openTime||'08:00'),end=minute(r.closeTime||'20:00'),step=Number(r.slotStep)||30,dur=Number(p.duration)||60,now=new Date(),today=todayKey();let html='';for(let m=start;m+dur<=end;m+=step){const t=clock(m),past=date===today&&(m<=now.getHours()*60+now.getMinutes()),busy=data.busy.some(b=>b.date===date&&overlap(m,dur,b));html+=`<button type="button" class="time" data-time="${t}" ${past||busy?'disabled':''}>${t}</button>`}holder.innerHTML=html||'<span style="color:var(--muted);font-size:11px">Sem horários disponíveis.</span>';holder.querySelectorAll('.time:not(:disabled)').forEach(b=>b.onclick=()=>{holder.querySelectorAll('.time').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');selectedTime=b.dataset.time;$('time').value=selectedTime})}
 async function load(){try{document.body.classList.add('loading');data=await req('/public/availability');$('businessTop').textContent=data.business.name;$('businessInfo').textContent=data.business.info||'';const r=data.rules||{};$('ruleCancel').textContent=`Avise com pelo menos ${r.cancelHours??4} hora(s) de antecedência.`;$('ruleLate').textContent=`Há tolerância de ${r.lateTolerance??10} minutos.`;$('awareText').textContent=`Estou ciente de que este pedido é apenas um pré-agendamento e só será confirmado após a barbearia comprovar o recebimento do sinal de ${r.depositPercent||50}%.`;const sel=$('service');sel.innerHTML='<option value="">Selecione o serviço</option>'+data.prices.map(p=>`<option value="${String(p.name).replace(/"/g,'&quot;')}">${p.name} — ${money(p.value)}</option>`).join('');const t=todayKey();$('date').min=t;$('date').max=addDays(t,90);if(!$('date').value)$('date').value=t;renderMoney();renderTimes()}catch(e){$('formStatus').innerHTML='<span class="error">'+e.message+'</span>';$('submitBtn').disabled=true}finally{document.body.classList.remove('loading')}}
 $('service').onchange=renderMoney;$('date').onchange=renderTimes;$('copyPix').onclick=async()=>{try{await navigator.clipboard.writeText(data.business.pix);$('copyPix').textContent='Copiado!';setTimeout(()=>$('copyPix').textContent='Copiar',1500)}catch{$('formStatus').textContent='Copie a chave Pix manualmente.'}};
 $('bookingForm').onsubmit=async e=>{e.preventDefault();const status=$('formStatus');status.textContent='';if(!$('time').value)return status.innerHTML='<span class="error">Escolha um horário disponível.</span>';const p=serviceObj();if(!p)return;const payload={name:$('name').value.trim(),phone:$('phone').value.trim(),service:p.name,date:$('date').value,time:$('time').value,note:$('note').value.trim(),requestId:requestId||uid()};requestId=payload.requestId;$('submitBtn').disabled=true;$('submitBtn').textContent='Enviando…';try{const x=await req('/public/book','POST',payload),signal=Number(x.signal||0),phone=digits(x.business.phone),when=new Date(x.date+'T12:00:00').toLocaleDateString('pt-BR')+' às '+x.time,msg=`Olá! Fiz um pré-agendamento para ${when}, serviço ${p.name}. O sinal é ${money(signal)}. Vou enviar o comprovante por aqui. Código: ${x.id.slice(0,8)}.`;$('bookingForm').style.display='none';$('success').classList.add('show');$('success').innerHTML=`<div class="eyebrow">Pré-agendamento recebido</div><h2>Ainda falta a confirmação do pagamento.</h2><p class="big">Reservamos a solicitação para <b>${when}</b>. O horário <b>ainda não está confirmado</b>.</p><p>Faça o sinal de <b>${money(signal)}</b>${x.business.pix?` pela chave Pix <b style="overflow-wrap:anywhere">${x.business.pix}</b>`:''} e envie o comprovante à barbearia.</p><p style="color:var(--muted)">Depois que Gabriel conferir o pagamento, ele confirmará o agendamento pelo WhatsApp.</p><a class="whatsapp" target="_blank" rel="noopener" href="https://wa.me/55${phone}?text=${encodeURIComponent(msg)}">Enviar comprovante no WhatsApp ↗</a>`;await load()}catch(err){status.innerHTML='<span class="error">'+err.message+'</span>';requestId='';await load()}finally{$('submitBtn').disabled=false;$('submitBtn').textContent='Solicitar pré-agendamento'}};
