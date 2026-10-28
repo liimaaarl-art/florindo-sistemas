@@ -1,10 +1,8 @@
 import {Pool} from 'pg';
-import {attachDatabasePool} from '@neon/functions';
 import {randomBytes,createHash,scryptSync,timingSafeEqual} from 'node:crypto';
 import {validate,phone,active} from './validation.mjs';
 
 const pool=new Pool({connectionString:process.env.DATABASE_URL,max:3,ssl:{rejectUnauthorized:true}});
-attachDatabasePool(pool);
 const hash=v=>createHash('sha256').update(v).digest('hex');
 const cors={
   'Access-Control-Allow-Origin':'*',
@@ -56,7 +54,7 @@ export default {async fetch(req){
       const client=await pool.connect();
       try{
         await client.query('BEGIN');const row=await stateRow(client);let next=row.data;next.schema=2;
-        const previous=next.appointments.find(a=>a.id===d.requestId);if(previous){await client.query('COMMIT');return response({ok:true,id:previous.id,date:previous.date,time:previous.time,value:previous.value,signal:(previous.value||0)*(cfg(next.settings).depositPercent/100),depositPercent:cfg(next.settings).depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}})}
+        const previous=next.appointments.find(a=>a.id===d.requestId);if(previous){await client.query('COMMIT');const p=normalizePrice(next.prices.find(x=>(x.name??x.service)===previous.service)||{name:previous.service,value:previous.value||0,duration:previous.duration});return response({ok:true,id:previous.id,date:previous.date,time:previous.time,value:previous.value,signal:(previous.value||0)*(cfg(next.settings).depositPercent/100),depositPercent:cfg(next.settings).depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}})}
         const priceRaw=next.prices.find(p=>String(p.name??p.service).trim().toLowerCase()===d.service.trim().toLowerCase());if(!priceRaw){await client.query('ROLLBACK');return response({error:'Esse serviço não está disponível para agendamento online.'},409)}
         const price=normalizePrice(priceRaw),c=cfg(next.settings),start=Number(d.time.slice(0,2))*60+Number(d.time.slice(3)),open=Number(c.openTime.slice(0,2))*60+Number(c.openTime.slice(3)),close=Number(c.closeTime.slice(0,2))*60+Number(c.closeTime.slice(3));
         if(start<open||start+price.duration>close||start%Math.max(5,c.slotStep)!==open%Math.max(5,c.slotStep)){await client.query('ROLLBACK');return response({error:'Escolha um horário disponível dentro do funcionamento da barbearia.'},400)}
