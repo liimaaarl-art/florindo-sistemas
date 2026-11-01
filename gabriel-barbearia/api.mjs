@@ -1,6 +1,6 @@
 import {Pool} from 'pg';
 import {randomBytes,createHash,scryptSync,timingSafeEqual} from 'node:crypto';
-import {validate,phone,active} from './validation.mjs';
+import {validate,phone,active,DEMO_LIMIT} from './validation.mjs';
 
 const pool=new Pool({connectionString:process.env.DATABASE_URL,max:3,ssl:{rejectUnauthorized:true}});
 const hash=v=>createHash('sha256').update(v).digest('hex');
@@ -16,10 +16,14 @@ const passwordHash=p=>{const salt=randomBytes(16).toString('hex');return salt+':
 async function body(req){const text=await req.text();if(text.length>100000)throw Error('Arquivo muito grande.');return JSON.parse(text)}
 const nowSP=()=>Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).map(x=>[x.type,x.value]));
 const num=(v,f)=>Number.isFinite(Number(v))?Number(v):f;
+const dateWeekday=s=>new Date(s+'T12:00:00Z').getUTCDay();
 const cfg=s=>({
   openTime:s.openTime||'08:00',closeTime:s.closeTime||'20:00',slotStep:num(s.slotStep,30),
-  depositPercent:num(s.depositPercent,50),cancelHours:num(s.cancelHours,4),lateTolerance:num(s.lateTolerance,10)
+  depositPercent:num(s.depositPercent,50),cancelHours:num(s.cancelHours,4),lateTolerance:num(s.lateTolerance,10),
+  workingDays:Array.isArray(s.workingDays)&&s.workingDays.length?s.workingDays:[1,2,3,4,5],
+  closedDates:Array.isArray(s.closedDates)?s.closedDates:[]
 });
+const openOn=(date,s)=>{const c=cfg(s);return c.workingDays.includes(dateWeekday(date))&&!c.closedDates.includes(date)};
 const normalizePrice=p=>({id:p.id,name:p.name??p.service,value:Number(p.value??p.price),duration:Number(p.duration)||60});
 async function stateRow(client=pool){const {rows}=await client.query('SELECT data,revision FROM gabriel_demo_state WHERE id=1');if(!rows[0])throw Error('Estado não encontrado.');return rows[0]}
 function publicState(d){const c=cfg(d.settings);return {
@@ -33,7 +37,7 @@ function sanitizedAdminState(d){return {...d,settings:{...d.settings,auth:d.sett
 export default {async fetch(req){
   const path=new URL(req.url).pathname.replace(/\/+$/,'')||'/';
   if(req.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
-  if(path==='/health')return response({ok:true,app:'gabriel-barbearia',version:'5.0',mode:'production'});
+  if(path==='/health')return response({ok:true,app:'gabriel-barbearia',version:'5.1',mode:'production'});
   try{
     if(path==='/auth/status'&&req.method==='GET'){
       const {data}=await stateRow();const a=data.settings?.auth;
@@ -55,10 +59,14 @@ export default {async fetch(req){
       try{
         await client.query('BEGIN');const row=await stateRow(client);let next=row.data;next.schema=2;
         const previous=next.appointments.find(a=>a.id===d.requestId);if(previous){await client.query('COMMIT');const p=normalizePrice(next.prices.find(x=>(x.name??x.service)===previous.service)||{name:previous.service,value:previous.value||0,duration:previous.duration});return response({ok:true,id:previous.id,date:previous.date,time:previous.time,value:previous.value,signal:(previous.value||0)*(cfg(next.settings).depositPercent/100),depositPercent:cfg(next.settings).depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}})}
+        if(!openOn(d.date,next.settings)){await client.query('ROLLBACK');return response({error:'A barbearia está fechada nesta data. Escolha outro dia.'},409)}
         const priceRaw=next.prices.find(p=>String(p.name??p.service).trim().toLowerCase()===d.service.trim().toLowerCase());if(!priceRaw){await client.query('ROLLBACK');return response({error:'Esse serviço não está disponível para agendamento online.'},409)}
         const price=normalizePrice(priceRaw),c=cfg(next.settings),start=Number(d.time.slice(0,2))*60+Number(d.time.slice(3)),open=Number(c.openTime.slice(0,2))*60+Number(c.openTime.slice(3)),close=Number(c.closeTime.slice(0,2))*60+Number(c.closeTime.slice(3));
         if(start<open||start+price.duration>close||start%Math.max(5,c.slotStep)!==open%Math.max(5,c.slotStep)){await client.query('ROLLBACK');return response({error:'Escolha um horário disponível dentro do funcionamento da barbearia.'},400)}
-        let person=next.clients.find(c=>phone(c.phone)===tel);if(!person){person={id:randomBytes(16).toString('hex'),name:d.name.trim(),phone:tel,about:''};next.clients.push(person)}else if(d.name.trim()&&person.name!==d.name.trim()){person.name=d.name.trim()}
+        let person=next.clients.find(c=>phone(c.phone)===tel);if(!person){
+          if(next.settings?.demoMode!==false&&next.clients.length>=DEMO_LIMIT){await client.query('ROLLBACK');return response({error:'Esta demonstração atingiu o limite de 3 clientes. O limite será removido após a ativação do contrato.'},409)}
+          person={id:randomBytes(16).toString('hex'),name:d.name.trim(),phone:tel,about:''};next.clients.push(person)
+        }else if(d.name.trim()&&person.name!==d.name.trim()){person.name=d.name.trim()}
         const note=['Pré-agendado pelo cliente na página pública.',d.note?.trim()?('Observação do cliente: '+d.note.trim()):''].filter(Boolean).join(' ');
         next.appointments.push({id:d.requestId,client:person.id,date:d.date,time:d.time,duration:price.duration,service:price.name,value:price.value,status:'Agendado',signalPaid:false,note,createdAt:new Date().toISOString()});
         try{validate(next)}catch(e){await client.query('ROLLBACK');return response({error:e.message.includes('sobrepostos')?'Esse horário acabou de ser reservado. Escolha outro.':e.message},409)}
@@ -91,7 +99,7 @@ export default {async fetch(req){
     if(path==='/state'&&role!=='admin')return response({error:'Acesso restrito ao administrador.'},403);
     const row=await stateRow();
     if(req.method==='GET'){
-      const data=path==='/agenda'?{schema:2,clients:row.data.clients,appointments:row.data.appointments,settings:{name:row.data.settings.name,phone:row.data.settings.phone,info:row.data.settings.info,openTime:row.data.settings.openTime,closeTime:row.data.settings.closeTime,depositPercent:row.data.settings.depositPercent,cancelHours:row.data.settings.cancelHours,lateTolerance:row.data.settings.lateTolerance}}:sanitizedAdminState(row.data);
+      const data=path==='/agenda'?{schema:2,clients:row.data.clients,appointments:row.data.appointments,settings:{name:row.data.settings.name,phone:row.data.settings.phone,info:row.data.settings.info,openTime:row.data.settings.openTime,closeTime:row.data.settings.closeTime,depositPercent:row.data.settings.depositPercent,cancelHours:row.data.settings.cancelHours,lateTolerance:row.data.settings.lateTolerance,workingDays:row.data.settings.workingDays,closedDates:row.data.settings.closedDates}}:sanitizedAdminState(row.data);
       return response({state:data,revision:row.revision,role});
     }
     if(req.method==='PUT'){
