@@ -1,7 +1,7 @@
 import core from '../api.mjs';
 import {Pool} from 'pg';
 import {randomBytes,createHash} from 'node:crypto';
-import {validate,phone,active,validDate,DEMO_LIMIT} from '../validation.mjs';
+import {validate,phone,active,validDate} from '../validation.mjs';
 
 const pool=new Pool({connectionString:process.env.DATABASE_URL,max:2,ssl:{rejectUnauthorized:true}});
 const hash=v=>createHash('sha256').update(v).digest('hex');
@@ -26,7 +26,7 @@ async function publicAvailability(res){
     business:{name:data.settings.name,phone:phone(data.settings.phone),info:data.settings.info,pix:data.settings.pix},
     prices:data.prices.map(normalizePrice),
     busy:data.appointments.filter(active).map(a=>({date:a.date,time:a.time,duration:a.duration,status:a.status})),
-    rules,bookingAvailable:data.appointments.length<DEMO_LIMIT,timezone:'America/Sao_Paulo'
+    rules,bookingAvailable:true,timezone:'America/Sao_Paulo'
   });
 }
 
@@ -44,7 +44,6 @@ async function publicBook(req,res){
     await client.query('BEGIN');const row=await stateRow(client);let next=row.data;next.schema=2;
     const previous=next.appointments.find(a=>a.id===d.requestId);
     if(previous){await client.query('COMMIT');const rules=publicRules(next.settings||{});return res.status(200).json({ok:true,id:previous.id,date:previous.date,time:previous.time,value:previous.value,signal:(previous.value||0)*(rules.depositPercent/100),depositPercent:rules.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}})}
-    if(next.appointments.length>=DEMO_LIMIT){await client.query('ROLLBACK');return res.status(409).json({error:'Não foi possível concluir o agendamento online. Entre em contato com a barbearia para verificar a disponibilidade.'})}
     if(!openOn(d.date,next.settings)){await client.query('ROLLBACK');return res.status(409).json({error:'A barbearia está fechada nesta data. Escolha outro dia.'})}
     const priceRaw=next.prices.find(p=>String(p.name??p.service).trim().toLowerCase()===d.service.trim().toLowerCase());
     if(!priceRaw){await client.query('ROLLBACK');return res.status(409).json({error:'Esse serviço não está disponível para agendamento online.'})}
@@ -52,7 +51,6 @@ async function publicBook(req,res){
     if(start<open||start+price.duration>close||start%Math.max(5,rules.slotStep)!==open%Math.max(5,rules.slotStep)){await client.query('ROLLBACK');return res.status(400).json({error:'Escolha um horário disponível dentro do funcionamento da barbearia.'})}
     let person=next.clients.find(c=>phone(c.phone)===tel);
     if(!person){
-      if(next.settings?.demoMode!==false&&next.clients.length>=DEMO_LIMIT){await client.query('ROLLBACK');return res.status(409).json({error:'Não foi possível concluir o cadastro. Entre em contato com a barbearia para agendar.'})}
       person={id:randomBytes(16).toString('hex'),name:d.name.trim(),phone:tel,about:''};next.clients.push(person)
     }
     const note=['Pré-agendado pelo cliente na página pública.',d.note?.trim()?('Observação do cliente: '+d.note.trim()):''].filter(Boolean).join(' ');
@@ -92,4 +90,5 @@ export default async function handler(req,res){
     setCors(res);res.status(500).json({error:'Não foi possível concluir. Tente novamente.'});
   }
 }
+
 

@@ -1,5 +1,4 @@
 const MAX_RECORDS=5000;
-const DEMO_LIMIT=3;
 const digits=s=>String(s??'').replace(/\D/g,'');
 function phone(s){let p=digits(s);if((p.length===12||p.length===13)&&p.startsWith('55'))p=p.slice(2);return /^[1-9]{2}[0-9]{8,9}$/.test(p)?p:null}
 function validDate(s){if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s)||Number(s.slice(0,4))<2000||Number(s.slice(0,4))>2100)return false;const d=new Date(s+'T12:00:00Z');return !Number.isNaN(d.getTime())&&d.toISOString().slice(0,10)===s}
@@ -22,7 +21,7 @@ const defaults=()=>({
   settings:{
     name:'Gabriel Cortes',phone:'19996281210',pix:'',info:'',
     openTime:'08:00',closeTime:'20:00',slotStep:30,depositPercent:50,cancelHours:4,lateTolerance:10,
-    workingDays:[1,2,3,4,5],closedDates:[],demoMode:true,
+    workingDays:[1,2,3,4,5],closedDates:[],demoMode:false,
     auth:null
   }
 });
@@ -44,9 +43,6 @@ function validate(x){
     if(typeof s.auth!=='object'||typeof s.auth.username!=='string'||s.auth.username.length<3||s.auth.username.length>60||typeof s.auth.passwordHash!=='string'||s.auth.passwordHash.length>300||typeof s.auth.mustChange!=='boolean')throw Error('Configuração de acesso inválida.');
   }
   for(const k of ['clients','appointments','prices'])if(!Array.isArray(x[k])||x[k].length>MAX_RECORDS||new Set(x[k].map(a=>a.id)).size!==x[k].length||x[k].some(a=>typeof a.id!=='string'||!a.id||a.id.length>100))throw Error('Dados inválidos ou acima do limite de segurança.');
-  if(s.demoMode!==false&&x.clients.length>DEMO_LIMIT)throw Error('Limite de 3 clientes atingido.');
-  if(s.demoMode!==false&&x.prices.length>DEMO_LIMIT)throw Error('Limite de 3 serviços atingido.');
-  if(x.appointments.length>DEMO_LIMIT)throw Error('A agenda atingiu o limite atual de 3 agendamentos.');
   for(const c of x.clients)if(typeof c.name!=='string'||!c.name.trim()||c.name.length>80||!phone(c.phone)||typeof (c.about??'')!=='string'||String(c.about??'').length>500)throw Error('Cliente inválido.');
   if(new Set(x.clients.map(c=>phone(c.phone))).size!==x.clients.length)throw Error('Telefones de clientes duplicados.');
   for(const p of x.prices){
@@ -60,5 +56,6 @@ function validate(x){
   x.schema=2;
   return x;
 }
-export {validate,defaults,phone,active,validDate,DEMO_LIMIT};
+export {validate,defaults,phone,active,validDate};
+
 

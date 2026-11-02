@@ -1,12 +1,10 @@
-# Gabriel Barbeiro — demonstração
+# Gabriel Cortes — sistema
 
 `index.html` é a página pública de agendamento. `admin.html` é o painel de Gabriel para agenda, clientes, serviços, pagamentos e ajustes. Ambos usam os mesmos dados do banco.
 
-## Regras da demonstração
+## Cadastro e agenda
 
-A demonstração mantém **somente dois limites comerciais**: até **3 clientes** e até **3 serviços/valores**. Dentro desses três serviços, Gabriel pode usar qualquer nome, valor e duração permitidos. Os agendamentos não têm limite comercial de três; existe apenas o limite técnico geral de segurança do banco.
-
-A propriedade `settings.demoMode` controla esses limites. Enquanto for diferente de `false`, a API valida no servidor o máximo de 3 clientes e 3 serviços. Após a efetivação do contrato, o modo demonstração pode ser desativado para remover esses dois limites.
+As antigas restrições comerciais de três clientes, serviços e agendamentos foram removidas. Permanecem limites técnicos de segurança e capacidade próprios da aplicação e da infraestrutura. Os registros existentes são preservados.
 
 ## Agenda
 
@@ -20,8 +18,9 @@ O painel permite editar e excluir clientes. Ao excluir um cliente, o painel avis
 
 ## WhatsApp e lembrete
 
-O painel destaca automaticamente os clientes confirmados que têm horário no dia seguinte e gera a mensagem de lembrete pronta. O envio atual continua sendo realizado pelo WhatsApp ao tocar no botão de envio. **Envio automático sem interação exige uma integração oficial de mensageria/WhatsApp Business e um agendador no servidor; esta demonstração não simula esse envio como se já estivesse conectado.**
+O painel destaca automaticamente os clientes confirmados que têm horário no dia seguinte e gera a mensagem de lembrete pronta. O envio atual continua sendo realizado pelo WhatsApp ao tocar no botão de envio. **Envio automático sem interação exige uma integração oficial de mensageria/WhatsApp Business e um agendador no servidor; o sistema não simula esse envio como se já estivesse conectado.**
 
 ## Backend
 
 A API fica em `api/gabriel.mjs`, com a lógica compartilhada em `api.mjs` e validação em `validation.mjs`. Credenciais e `DATABASE_URL` permanecem somente no ambiente de hospedagem, nunca no HTML ou repositório.
+

@@ -1,0 +1,2 @@
+-- Remove o limite comercial de três registros mantendo a validação das listas.
+ALTER TABLE public.gabriel_demo_state DROP CONSTRAINT gabriel_demo_state_data_check, DROP CONSTRAINT gabriel_demo_state_data_check1, DROP CONSTRAINT gabriel_demo_state_data_check2, ADD CONSTRAINT gabriel_clients_array_check CHECK (jsonb_typeof(data->'clients') = 'array'), ADD CONSTRAINT gabriel_appointments_array_check CHECK (jsonb_typeof(data->'appointments') = 'array'), ADD CONSTRAINT gabriel_prices_array_check CHECK (jsonb_typeof(data->'prices') = 'array');
