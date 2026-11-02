@@ -2,7 +2,7 @@ const MAX_RECORDS=5000;
 const DEMO_LIMIT=3;
 const digits=s=>String(s??'').replace(/\D/g,'');
 function phone(s){let p=digits(s);if((p.length===12||p.length===13)&&p.startsWith('55'))p=p.slice(2);return /^[1-9]{2}[0-9]{8,9}$/.test(p)?p:null}
-function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(s)&&Number(s.slice(0,4))>=2000&&Number(s.slice(0,4))<=2100&&!Number.isNaN(new Date(s+'T12:00:00').getTime())}
+function validDate(s){if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s)||Number(s.slice(0,4))<2000||Number(s.slice(0,4))>2100)return false;const d=new Date(s+'T12:00:00Z');return !Number.isNaN(d.getTime())&&d.toISOString().slice(0,10)===s}
 function validTime(s){return /^([01]\d|2[0-3]):[0-5]\d$/.test(String(s||''))}
 const active=a=>!['Cancelado','Faltou'].includes(a.status);
 function conflict(a,items){
@@ -20,7 +20,7 @@ const defaults=()=>({
   appointments:[],
   prices:[],
   settings:{
-    name:'Gabriel Barbeiro',phone:'19996281210',pix:'',info:'',
+    name:'Gabriel Cortes',phone:'19996281210',pix:'',info:'',
     openTime:'08:00',closeTime:'20:00',slotStep:30,depositPercent:50,cancelHours:4,lateTolerance:10,
     workingDays:[1,2,3,4,5],closedDates:[],demoMode:true,
     auth:null
@@ -59,4 +59,5 @@ function validate(x){
   x.schema=2;
   return x;
 }
-export {validate,defaults,phone,active,DEMO_LIMIT};
+export {validate,defaults,phone,active,validDate,DEMO_LIMIT};
+

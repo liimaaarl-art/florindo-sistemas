@@ -1,7 +1,7 @@
 import core from '../api.mjs';
 import {Pool} from 'pg';
 import {randomBytes,createHash} from 'node:crypto';
-import {validate,phone,active,DEMO_LIMIT} from '../validation.mjs';
+import {validate,phone,active,validDate,DEMO_LIMIT} from '../validation.mjs';
 
 const pool=new Pool({connectionString:process.env.DATABASE_URL,max:2,ssl:{rejectUnauthorized:true}});
 const hash=v=>createHash('sha256').update(v).digest('hex');
@@ -35,7 +35,7 @@ async function publicBook(req,res){
   if(typeof d.name!=='string'||!d.name.trim()||d.name.length>80||typeof d.phone!=='string'||d.phone.length>25||typeof d.service!=='string'||!d.service.trim()||d.service.length>80||typeof d.requestId!=='string'||!/^[a-zA-Z0-9-]{20,100}$/.test(d.requestId)||typeof (d.note??'')!=='string'||String(d.note??'').length>300)return res.status(400).json({error:'Preencha os dados corretamente.'});
   const tel=phone(d.phone);if(!tel)return res.status(400).json({error:'Informe um telefone válido com DDD.'});
   const n=nowSP(),today=n.year+'-'+n.month+'-'+n.day,nowTime=n.hour+':'+n.minute;const last=new Date(today+'T12:00:00Z');last.setUTCDate(last.getUTCDate()+90);
-  if(typeof d.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(d.date)||d.date<today||d.date>last.toISOString().slice(0,10)||typeof d.time!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(d.time)||(d.date===today&&d.time<=nowTime))return res.status(400).json({error:'Escolha uma data e horário futuros, nos próximos 90 dias.'});
+  if(typeof d.date!=='string'||!validDate(d.date)||d.date<today||d.date>last.toISOString().slice(0,10)||typeof d.time!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(d.time)||(d.date===today&&d.time<=nowTime))return res.status(400).json({error:'Escolha uma data e horário futuros, nos próximos 90 dias.'});
   const ip=req.headers['x-forwarded-for']?.toString().split(',')[0]||'unknown',rate=hash('booking:'+ip);
   const attempts=await pool.query(`INSERT INTO gabriel_login_limits(key,window_start,attempts) VALUES($1,now(),1) ON CONFLICT(key) DO UPDATE SET attempts=CASE WHEN gabriel_login_limits.window_start<now()-interval '15 minutes' THEN 1 ELSE gabriel_login_limits.attempts+1 END,window_start=CASE WHEN gabriel_login_limits.window_start<now()-interval '15 minutes' THEN now() ELSE gabriel_login_limits.window_start END RETURNING attempts`,[rate]);
   if(attempts.rows[0].attempts>30)return res.status(429).json({error:'Muitas tentativas. Aguarde alguns minutos.'});
@@ -53,7 +53,7 @@ async function publicBook(req,res){
     if(!person){
       if(next.settings?.demoMode!==false&&next.clients.length>=DEMO_LIMIT){await client.query('ROLLBACK');return res.status(409).json({error:'Esta demonstração atingiu o limite de 3 clientes. O limite será removido após a ativação do contrato.'})}
       person={id:randomBytes(16).toString('hex'),name:d.name.trim(),phone:tel,about:''};next.clients.push(person)
-    }else if(d.name.trim()&&person.name!==d.name.trim()){person.name=d.name.trim()}
+    }
     const note=['Pré-agendado pelo cliente na página pública.',d.note?.trim()?('Observação do cliente: '+d.note.trim()):''].filter(Boolean).join(' ');
     next.appointments.push({id:d.requestId,client:person.id,date:d.date,time:d.time,duration:price.duration,service:price.name,value:price.value,status:'Agendado',signalPaid:false,note,createdAt:new Date().toISOString()});
     try{validate(next)}catch(e){await client.query('ROLLBACK');return res.status(409).json({error:e.message.includes('sobrepostos')?'Esse horário acabou de ser reservado. Escolha outro.':e.message})}
@@ -91,3 +91,4 @@ export default async function handler(req,res){
     setCors(res);res.status(500).json({error:'Não foi possível concluir. Tente novamente.'});
   }
 }
+
