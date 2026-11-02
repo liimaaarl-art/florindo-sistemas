@@ -39,13 +39,14 @@ function validate(x){
   if(s.lateTolerance!==undefined&&(!Number.isFinite(s.lateTolerance)||s.lateTolerance<0||s.lateTolerance>120))throw Error('Tolerância de atraso inválida.');
   if(s.workingDays!==undefined&&(!Array.isArray(s.workingDays)||!s.workingDays.length||s.workingDays.length>7||new Set(s.workingDays).size!==s.workingDays.length||s.workingDays.some(d=>!Number.isInteger(d)||d<0||d>6)))throw Error('Dias de atendimento inválidos.');
   if(s.closedDates!==undefined&&(!Array.isArray(s.closedDates)||s.closedDates.length>366||new Set(s.closedDates).size!==s.closedDates.length||s.closedDates.some(d=>!validDate(d))))throw Error('Datas fechadas inválidas.');
-  if(s.demoMode!==undefined&&typeof s.demoMode!=='boolean')throw Error('Configuração da demonstração inválida.');
+  if(s.demoMode!==undefined&&typeof s.demoMode!=='boolean')throw Error('Configuração de capacidade inválida.');
   if(s.auth!==undefined&&s.auth!==null){
     if(typeof s.auth!=='object'||typeof s.auth.username!=='string'||s.auth.username.length<3||s.auth.username.length>60||typeof s.auth.passwordHash!=='string'||s.auth.passwordHash.length>300||typeof s.auth.mustChange!=='boolean')throw Error('Configuração de acesso inválida.');
   }
   for(const k of ['clients','appointments','prices'])if(!Array.isArray(x[k])||x[k].length>MAX_RECORDS||new Set(x[k].map(a=>a.id)).size!==x[k].length||x[k].some(a=>typeof a.id!=='string'||!a.id||a.id.length>100))throw Error('Dados inválidos ou acima do limite de segurança.');
-  if(s.demoMode!==false&&x.clients.length>DEMO_LIMIT)throw Error('Limite da demonstração atingido: até 3 clientes. Após a efetivação do contrato, este limite é removido.');
-  if(s.demoMode!==false&&x.prices.length>DEMO_LIMIT)throw Error('Limite da demonstração atingido: até 3 serviços. Após a efetivação do contrato, este limite é removido.');
+  if(s.demoMode!==false&&x.clients.length>DEMO_LIMIT)throw Error('Limite de 3 clientes atingido.');
+  if(s.demoMode!==false&&x.prices.length>DEMO_LIMIT)throw Error('Limite de 3 serviços atingido.');
+  if(x.appointments.length>DEMO_LIMIT)throw Error('A agenda atingiu o limite atual de 3 agendamentos.');
   for(const c of x.clients)if(typeof c.name!=='string'||!c.name.trim()||c.name.length>80||!phone(c.phone)||typeof (c.about??'')!=='string'||String(c.about??'').length>500)throw Error('Cliente inválido.');
   if(new Set(x.clients.map(c=>phone(c.phone))).size!==x.clients.length)throw Error('Telefones de clientes duplicados.');
   for(const p of x.prices){

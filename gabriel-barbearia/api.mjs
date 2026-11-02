@@ -30,7 +30,7 @@ function publicState(d){const c=cfg(d.settings);return {
   business:{name:d.settings.name,phone:phone(d.settings.phone),info:d.settings.info,pix:d.settings.pix},
   prices:d.prices.map(normalizePrice),
   busy:d.appointments.filter(active).map(a=>({date:a.date,time:a.time,duration:a.duration,status:a.status})),
-  rules:c,timezone:'America/Sao_Paulo'
+  rules:c,bookingAvailable:d.appointments.length<DEMO_LIMIT,timezone:'America/Sao_Paulo'
 }}
 function sanitizedAdminState(d){return {...d,settings:{...d.settings,auth:d.settings.auth?{username:d.settings.auth.username,mustChange:!!d.settings.auth.mustChange}:null}}}
 
@@ -59,12 +59,13 @@ export default {async fetch(req){
       try{
         await client.query('BEGIN');const row=await stateRow(client);let next=row.data;next.schema=2;
         const previous=next.appointments.find(a=>a.id===d.requestId);if(previous){await client.query('COMMIT');const p=normalizePrice(next.prices.find(x=>(x.name??x.service)===previous.service)||{name:previous.service,value:previous.value||0,duration:previous.duration});return response({ok:true,id:previous.id,date:previous.date,time:previous.time,value:previous.value,signal:(previous.value||0)*(cfg(next.settings).depositPercent/100),depositPercent:cfg(next.settings).depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}})}
+        if(next.appointments.length>=DEMO_LIMIT){await client.query('ROLLBACK');return response({error:'Não foi possível concluir o agendamento online. Entre em contato com a barbearia para verificar a disponibilidade.'},409)}
         if(!openOn(d.date,next.settings)){await client.query('ROLLBACK');return response({error:'A barbearia está fechada nesta data. Escolha outro dia.'},409)}
         const priceRaw=next.prices.find(p=>String(p.name??p.service).trim().toLowerCase()===d.service.trim().toLowerCase());if(!priceRaw){await client.query('ROLLBACK');return response({error:'Esse serviço não está disponível para agendamento online.'},409)}
         const price=normalizePrice(priceRaw),c=cfg(next.settings),start=Number(d.time.slice(0,2))*60+Number(d.time.slice(3)),open=Number(c.openTime.slice(0,2))*60+Number(c.openTime.slice(3)),close=Number(c.closeTime.slice(0,2))*60+Number(c.closeTime.slice(3));
         if(start<open||start+price.duration>close||start%Math.max(5,c.slotStep)!==open%Math.max(5,c.slotStep)){await client.query('ROLLBACK');return response({error:'Escolha um horário disponível dentro do funcionamento da barbearia.'},400)}
         let person=next.clients.find(c=>phone(c.phone)===tel);if(!person){
-          if(next.settings?.demoMode!==false&&next.clients.length>=DEMO_LIMIT){await client.query('ROLLBACK');return response({error:'Esta demonstração atingiu o limite de 3 clientes. O limite será removido após a ativação do contrato.'},409)}
+          if(next.settings?.demoMode!==false&&next.clients.length>=DEMO_LIMIT){await client.query('ROLLBACK');return response({error:'Não foi possível concluir o cadastro. Entre em contato com a barbearia para agendar.'},409)}
           person={id:randomBytes(16).toString('hex'),name:d.name.trim(),phone:tel,about:''};next.clients.push(person)
         }
         const note=['Pré-agendado pelo cliente na página pública.',d.note?.trim()?('Observação do cliente: '+d.note.trim()):''].filter(Boolean).join(' ');
