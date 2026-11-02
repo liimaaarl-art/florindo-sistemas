@@ -41,7 +41,7 @@ export default {async fetch(req){
   try{
     if(path==='/auth/status'&&req.method==='GET'){
       const {data}=await stateRow();const a=data.settings?.auth;
-      return response({setup:!!a,username:a?.username||null,mustChange:!!a?.mustChange});
+      return response({setup:!!a,mustChange:!!a?.mustChange});
     }
     if(path==='/public/availability'&&req.method==='GET'){
       const {data}=await stateRow();return response(publicState(data));
