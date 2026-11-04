@@ -33,7 +33,8 @@ async function publicAvailability(res){
 async function publicBook(req,res){
   const d=typeof req.body==='string'?JSON.parse(req.body):req.body||{};
   if(typeof d.name!=='string'||!d.name.trim()||d.name.length>80||typeof d.phone!=='string'||d.phone.length>25||typeof d.service!=='string'||!d.service.trim()||d.service.length>80||typeof d.requestId!=='string'||!/^[a-zA-Z0-9-]{20,100}$/.test(d.requestId)||typeof (d.note??'')!=='string'||String(d.note??'').length>300)return res.status(400).json({error:'Preencha os dados corretamente.'});
-  const tel=phone(d.phone);if(!tel)return res.status(400).json({error:'Informe um telefone válido com DDD.'});
+  if(d.paymentChoice!==undefined&&!['deposit','onsite'].includes(d.paymentChoice))return res.status(400).json({error:'Escolha uma forma de pagamento válida.'});
+      const tel=phone(d.phone);if(!tel)return res.status(400).json({error:'Informe um telefone válido com DDD.'});
   const n=nowSP(),today=n.year+'-'+n.month+'-'+n.day,nowTime=n.hour+':'+n.minute;const last=new Date(today+'T12:00:00Z');last.setUTCDate(last.getUTCDate()+90);
   if(typeof d.date!=='string'||!validDate(d.date)||d.date<today||d.date>last.toISOString().slice(0,10)||typeof d.time!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(d.time)||(d.date===today&&d.time<=nowTime))return res.status(400).json({error:'Escolha uma data e horário futuros, nos próximos 90 dias.'});
   const ip=req.headers['x-forwarded-for']?.toString().split(',')[0]||'unknown',rate=hash('booking:'+ip);
@@ -43,7 +44,7 @@ async function publicBook(req,res){
   try{
     await client.query('BEGIN');const row=await stateRow(client);let next=row.data;next.schema=2;
     const previous=next.appointments.find(a=>a.id===d.requestId);
-    if(previous){await client.query('COMMIT');const rules=publicRules(next.settings||{});return res.status(200).json({ok:true,id:previous.id,date:previous.date,time:previous.time,value:previous.value,signal:(previous.value||0)*(rules.depositPercent/100),depositPercent:rules.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}})}
+    if(previous){await client.query('COMMIT');const rules=publicRules(next.settings||{});return res.status(200).json({ok:true,id:previous.id,date:previous.date,time:previous.time,value:previous.value,paymentChoice:previous.paymentChoice||'deposit',signal:previous.paymentChoice==='onsite'?0:(previous.value||0)*(rules.depositPercent/100),depositPercent:rules.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}})}
     if(!openOn(d.date,next.settings)){await client.query('ROLLBACK');return res.status(409).json({error:'A barbearia está fechada nesta data. Escolha outro dia.'})}
     const priceRaw=next.prices.find(p=>String(p.name??p.service).trim().toLowerCase()===d.service.trim().toLowerCase());
     if(!priceRaw){await client.query('ROLLBACK');return res.status(409).json({error:'Esse serviço não está disponível para agendamento online.'})}
@@ -53,12 +54,12 @@ async function publicBook(req,res){
     if(!person){
       person={id:randomBytes(16).toString('hex'),name:d.name.trim(),phone:tel,about:''};next.clients.push(person)
     }
-    const note=['Pré-agendado pelo cliente na página pública.',d.note?.trim()?('Observação do cliente: '+d.note.trim()):''].filter(Boolean).join(' ');
-    next.appointments.push({id:d.requestId,client:person.id,date:d.date,time:d.time,duration:price.duration,service:price.name,value:price.value,status:'Agendado',signalPaid:false,note,createdAt:new Date().toISOString()});
+    const note=[d.paymentChoice==='onsite'?'Agendado online sem sinal; pagamento no atendimento.':'Pré-agendado pelo cliente na página pública.',d.note?.trim()?('Observação do cliente: '+d.note.trim()):''].filter(Boolean).join(' ');
+    next.appointments.push({id:d.requestId,client:person.id,date:d.date,time:d.time,duration:price.duration,service:price.name,value:price.value,status:d.paymentChoice==='onsite'?'Confirmado':'Agendado',paymentChoice:d.paymentChoice||'deposit',signalPaid:false,note,createdAt:new Date().toISOString()});
     try{validate(next)}catch(e){await client.query('ROLLBACK');return res.status(409).json({error:e.message.includes('sobrepostos')?'Esse horário acabou de ser reservado. Escolha outro.':e.message})}
     const saved=await client.query('UPDATE gabriel_demo_state SET data=$1::jsonb,revision=revision+1,updated_at=now() WHERE id=1 AND revision=$2 RETURNING revision',[JSON.stringify(next),row.revision]);
     if(!saved.rowCount){await client.query('ROLLBACK');return res.status(409).json({error:'A agenda acabou de mudar. Atualize os horários e tente novamente.'})}
-    await client.query('COMMIT');return res.status(201).json({ok:true,id:d.requestId,date:d.date,time:d.time,value:price.value,signal:price.value*(rules.depositPercent/100),depositPercent:rules.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}});
+    await client.query('COMMIT');return res.status(201).json({ok:true,id:d.requestId,date:d.date,time:d.time,value:price.value,paymentChoice:d.paymentChoice||'deposit',signal:d.paymentChoice==='onsite'?0:price.value*(rules.depositPercent/100),depositPercent:rules.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}});
   }catch(e){await client.query('ROLLBACK');throw e}finally{client.release()}
 }
 
@@ -90,5 +91,6 @@ export default async function handler(req,res){
     setCors(res);res.status(500).json({error:'Não foi possível concluir. Tente novamente.'});
   }
 }
+
 
 

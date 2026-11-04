@@ -50,12 +50,13 @@ function validate(x){
     if(p.duration!==undefined&&(!Number.isInteger(p.duration)||p.duration<5||p.duration>240))throw Error('Duração de serviço inválida.');
   }
   for(const a of x.appointments){
-    if(!x.clients.some(c=>c.id===a.client)||!validDate(a.date)||!validTime(a.time)||!Number.isInteger(a.duration)||a.duration<5||a.duration>240||Number(a.time.slice(0,2))*60+Number(a.time.slice(3))+a.duration>1440||!['Agendado','Confirmado','Concluído','Cancelado','Faltou'].includes(a.status)||typeof a.service!=='string'||!a.service.trim()||a.service.length>80||typeof (a.note??'')!=='string'||String(a.note??'').length>500||(a.value!==null&&a.value!==undefined&&(typeof a.value!=='number'||!Number.isFinite(a.value)||a.value<0||a.value>99999))||(a.signalPaid!==undefined&&typeof a.signalPaid!=='boolean'))throw Error('Agendamento inválido.');
+    if(!x.clients.some(c=>c.id===a.client)||!validDate(a.date)||!validTime(a.time)||!Number.isInteger(a.duration)||a.duration<5||a.duration>240||Number(a.time.slice(0,2))*60+Number(a.time.slice(3))+a.duration>1440||!['Agendado','Confirmado','Concluído','Cancelado','Faltou'].includes(a.status)||typeof a.service!=='string'||!a.service.trim()||a.service.length>80||typeof (a.note??'')!=='string'||String(a.note??'').length>500||(a.value!==null&&a.value!==undefined&&(typeof a.value!=='number'||!Number.isFinite(a.value)||a.value<0||a.value>99999))||(a.signalPaid!==undefined&&typeof a.signalPaid!=='boolean')||(a.paymentChoice!==undefined&&!['deposit','onsite'].includes(a.paymentChoice)))throw Error('Agendamento inválido.');
     if(conflict(a,x.appointments))throw Error('Existem horários sobrepostos para Gabriel.');
   }
   x.schema=2;
   return x;
 }
 export {validate,defaults,phone,active,validDate};
+
 
 

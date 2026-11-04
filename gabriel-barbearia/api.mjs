@@ -49,6 +49,7 @@ export default {async fetch(req){
     if(path==='/public/book'&&req.method==='POST'){
       const d=await body(req);
       if(typeof d.name!=='string'||!d.name.trim()||d.name.length>80||typeof d.phone!=='string'||d.phone.length>25||typeof d.service!=='string'||!d.service.trim()||d.service.length>80||typeof d.requestId!=='string'||!/^[a-zA-Z0-9-]{20,100}$/.test(d.requestId)||typeof (d.note??'')!=='string'||String(d.note??'').length>300)return response({error:'Preencha os dados corretamente.'},400);
+      if(d.paymentChoice!==undefined&&!['deposit','onsite'].includes(d.paymentChoice))return response({error:'Escolha uma forma de pagamento válida.'},400);
       const tel=phone(d.phone);if(!tel)return response({error:'Informe um telefone válido com DDD.'},400);
       const n=nowSP(),today=n.year+'-'+n.month+'-'+n.day,nowTime=n.hour+':'+n.minute;const last=new Date(today+'T12:00:00Z');last.setUTCDate(last.getUTCDate()+90);
       if(typeof d.date!=='string'||!validDate(d.date)||d.date<today||d.date>last.toISOString().slice(0,10)||typeof d.time!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(d.time)||(d.date===today&&d.time<=nowTime))return response({error:'Escolha uma data e horário futuros, nos próximos 90 dias.'},400);
@@ -58,7 +59,7 @@ export default {async fetch(req){
       const client=await pool.connect();
       try{
         await client.query('BEGIN');const row=await stateRow(client);let next=row.data;next.schema=2;
-        const previous=next.appointments.find(a=>a.id===d.requestId);if(previous){await client.query('COMMIT');const p=normalizePrice(next.prices.find(x=>(x.name??x.service)===previous.service)||{name:previous.service,value:previous.value||0,duration:previous.duration});return response({ok:true,id:previous.id,date:previous.date,time:previous.time,value:previous.value,signal:(previous.value||0)*(cfg(next.settings).depositPercent/100),depositPercent:cfg(next.settings).depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}})}
+        const previous=next.appointments.find(a=>a.id===d.requestId);if(previous){await client.query('COMMIT');const p=normalizePrice(next.prices.find(x=>(x.name??x.service)===previous.service)||{name:previous.service,value:previous.value||0,duration:previous.duration});return response({ok:true,id:previous.id,date:previous.date,time:previous.time,value:previous.value,paymentChoice:previous.paymentChoice||'deposit',signal:previous.paymentChoice==='onsite'?0:(previous.value||0)*(cfg(next.settings).depositPercent/100),depositPercent:cfg(next.settings).depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}})}
         if(!openOn(d.date,next.settings)){await client.query('ROLLBACK');return response({error:'A barbearia está fechada nesta data. Escolha outro dia.'},409)}
         const priceRaw=next.prices.find(p=>String(p.name??p.service).trim().toLowerCase()===d.service.trim().toLowerCase());if(!priceRaw){await client.query('ROLLBACK');return response({error:'Esse serviço não está disponível para agendamento online.'},409)}
         const price=normalizePrice(priceRaw),c=cfg(next.settings),start=Number(d.time.slice(0,2))*60+Number(d.time.slice(3)),open=Number(c.openTime.slice(0,2))*60+Number(c.openTime.slice(3)),close=Number(c.closeTime.slice(0,2))*60+Number(c.closeTime.slice(3));
@@ -66,11 +67,11 @@ export default {async fetch(req){
         let person=next.clients.find(c=>phone(c.phone)===tel);if(!person){
           person={id:randomBytes(16).toString('hex'),name:d.name.trim(),phone:tel,about:''};next.clients.push(person)
         }
-        const note=['Pré-agendado pelo cliente na página pública.',d.note?.trim()?('Observação do cliente: '+d.note.trim()):''].filter(Boolean).join(' ');
-        next.appointments.push({id:d.requestId,client:person.id,date:d.date,time:d.time,duration:price.duration,service:price.name,value:price.value,status:'Agendado',signalPaid:false,note,createdAt:new Date().toISOString()});
+        const note=[d.paymentChoice==='onsite'?'Agendado online sem sinal; pagamento no atendimento.':'Pré-agendado pelo cliente na página pública.',d.note?.trim()?('Observação do cliente: '+d.note.trim()):''].filter(Boolean).join(' ');
+        next.appointments.push({id:d.requestId,client:person.id,date:d.date,time:d.time,duration:price.duration,service:price.name,value:price.value,status:d.paymentChoice==='onsite'?'Confirmado':'Agendado',paymentChoice:d.paymentChoice||'deposit',signalPaid:false,note,createdAt:new Date().toISOString()});
         try{validate(next)}catch(e){await client.query('ROLLBACK');return response({error:e.message.includes('sobrepostos')?'Esse horário acabou de ser reservado. Escolha outro.':e.message},409)}
         const saved=await client.query('UPDATE gabriel_demo_state SET data=$1::jsonb,revision=revision+1,updated_at=now() WHERE id=1 AND revision=$2 RETURNING revision',[JSON.stringify(next),row.revision]);if(!saved.rowCount){await client.query('ROLLBACK');return response({error:'A agenda acabou de mudar. Atualize os horários e tente novamente.'},409)}
-        await client.query('COMMIT');return response({ok:true,id:d.requestId,date:d.date,time:d.time,value:price.value,signal:price.value*(c.depositPercent/100),depositPercent:c.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}},201);
+        await client.query('COMMIT');return response({ok:true,id:d.requestId,date:d.date,time:d.time,value:price.value,paymentChoice:d.paymentChoice||'deposit',signal:d.paymentChoice==='onsite'?0:price.value*(c.depositPercent/100),depositPercent:c.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}},201);
       }catch(e){await client.query('ROLLBACK');throw e}finally{client.release()}
     }
 
@@ -110,5 +111,6 @@ export default {async fetch(req){
     return response({error:'Operação não disponível.'},405);
   }catch(e){console.error('gabriel-api',e.code||e.name,e.message);return response({error:'Não foi possível concluir. Tente novamente.'},500)}
 }};
+
 
 
