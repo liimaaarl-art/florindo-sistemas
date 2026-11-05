@@ -3,8 +3,14 @@
   "version": "5.0.0",
   "private": true,
   "type": "module",
-  "engines": {"node": ">=20"},
+  "scripts": {
+    "test": "node --experimental-test-module-mocks --test tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
+    "nodemailer": "10.3.1",
     "pg": "^8.16.3"
   }
 }
