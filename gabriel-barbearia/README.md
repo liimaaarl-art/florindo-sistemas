@@ -20,7 +20,23 @@ O painel permite editar e excluir clientes. Ao excluir um cliente, o painel avis
 
 O painel destaca automaticamente os clientes confirmados que têm horário no dia seguinte e gera a mensagem de lembrete pronta. O envio atual continua sendo realizado pelo WhatsApp ao tocar no botão de envio. **Envio automático sem interação exige uma integração oficial de mensageria/WhatsApp Business e um agendador no servidor; o sistema não simula esse envio como se já estivesse conectado.**
 
-## Backend
+## Avisos por e-mail
+
+Novos agendamentos feitos na página pública geram um aviso por Gmail após a confirmação do salvamento no banco. Repetir a mesma requisição não dispara outro aviso. Agendamentos criados pelo próprio painel não enviam avisos.
+
+Configure somente no ambiente do servidor:
+
+- `GMAIL_USER`: conta Gmail remetente.
+- `GMAIL_APP_PASSWORD`: senha de aplicativo Google de 16 caracteres, armazenada como segredo. Nunca usar a senha normal nem publicar a credencial no repositório.
+- `BOOKING_NOTIFICATION_EMAIL`: destinatário dos avisos.
+- `BOOKING_APP_URL`: endereço público do sistema, opcional.
+
+Sem a credencial de envio, a agenda continua funcionando e os avisos permanecem inativos. Uma falha de SMTP não desfaz o agendamento; o código do erro fica no log do servidor. Não há fila de reenvio automático nesta versão. O recebimento e o alerta no celular dependem da entrega do Gmail e das notificações do aparelho. A implantação e os testes locais não enviam mensagens reais.
+
+Para habilitar, ative a verificação em duas etapas na conta Google, gere uma senha de app se a opção estiver disponível, cadastre-a diretamente como `GMAIL_APP_PASSWORD` na hospedagem e faça um novo deployment. Depois, realize um agendamento de teste e confira a caixa de entrada e o spam do destinatário.
+
+## Estrutura da API
 
 A API fica em `api/gabriel.mjs`, com a lógica compartilhada em `api.mjs` e validação em `validation.mjs`. Credenciais e `DATABASE_URL` permanecem somente no ambiente de hospedagem, nunca no HTML ou repositório.
+
 

@@ -1,6 +1,7 @@
 import {Pool} from 'pg';
 import {randomBytes,createHash,scryptSync,timingSafeEqual} from 'node:crypto';
 import {validate,phone,active,validDate} from './validation.mjs';
+import {notifyBooking} from './booking-email.mjs';
 
 const pool=new Pool({connectionString:process.env.DATABASE_URL,max:3,ssl:{rejectUnauthorized:true}});
 const hash=v=>createHash('sha256').update(v).digest('hex');
@@ -71,7 +72,9 @@ export default {async fetch(req){
         next.appointments.push({id:d.requestId,client:person.id,date:d.date,time:d.time,duration:price.duration,service:price.name,value:price.value,status:d.paymentChoice==='onsite'?'Confirmado':'Agendado',paymentChoice:d.paymentChoice||'deposit',signalPaid:false,note,createdAt:new Date().toISOString()});
         try{validate(next)}catch(e){await client.query('ROLLBACK');return response({error:e.message.includes('sobrepostos')?'Esse horário acabou de ser reservado. Escolha outro.':e.message},409)}
         const saved=await client.query('UPDATE gabriel_demo_state SET data=$1::jsonb,revision=revision+1,updated_at=now() WHERE id=1 AND revision=$2 RETURNING revision',[JSON.stringify(next),row.revision]);if(!saved.rowCount){await client.query('ROLLBACK');return response({error:'A agenda acabou de mudar. Atualize os horários e tente novamente.'},409)}
-        await client.query('COMMIT');return response({ok:true,id:d.requestId,date:d.date,time:d.time,value:price.value,paymentChoice:d.paymentChoice||'deposit',signal:d.paymentChoice==='onsite'?0:price.value*(c.depositPercent/100),depositPercent:c.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}},201);
+        await client.query('COMMIT');
+        await notifyBooking({appointment:next.appointments.find(a=>a.id===d.requestId),client:person,businessName:next.settings.name});
+        return response({ok:true,id:d.requestId,date:d.date,time:d.time,value:price.value,paymentChoice:d.paymentChoice||'deposit',signal:d.paymentChoice==='onsite'?0:price.value*(c.depositPercent/100),depositPercent:c.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}},201);
       }catch(e){await client.query('ROLLBACK');throw e}finally{client.release()}
     }
 
@@ -111,6 +114,7 @@ export default {async fetch(req){
     return response({error:'Operação não disponível.'},405);
   }catch(e){console.error('gabriel-api',e.code||e.name,e.message);return response({error:'Não foi possível concluir. Tente novamente.'},500)}
 }};
+
 
 
 

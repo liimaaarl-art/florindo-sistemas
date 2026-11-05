@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'gabriel-barbearia/api.mjs'
+      - 'gabriel-barbearia/booking-email.mjs'
       - 'gabriel-barbearia/validation.mjs'
       - 'gabriel-barbearia/package.json'
       - 'gabriel-barbearia/package-lock.json'
@@ -44,3 +45,4 @@ jobs:
             git commit -m "Build Gabriel API deployment bundle"
             git push
           fi
+

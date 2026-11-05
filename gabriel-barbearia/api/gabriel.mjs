@@ -2,6 +2,7 @@ import core from '../api.mjs';
 import {Pool} from 'pg';
 import {randomBytes,createHash} from 'node:crypto';
 import {validate,phone,active,validDate} from '../validation.mjs';
+import {notifyBooking} from '../booking-email.mjs';
 
 const pool=new Pool({connectionString:process.env.DATABASE_URL,max:2,ssl:{rejectUnauthorized:true}});
 const hash=v=>createHash('sha256').update(v).digest('hex');
@@ -59,7 +60,9 @@ async function publicBook(req,res){
     try{validate(next)}catch(e){await client.query('ROLLBACK');return res.status(409).json({error:e.message.includes('sobrepostos')?'Esse horário acabou de ser reservado. Escolha outro.':e.message})}
     const saved=await client.query('UPDATE gabriel_demo_state SET data=$1::jsonb,revision=revision+1,updated_at=now() WHERE id=1 AND revision=$2 RETURNING revision',[JSON.stringify(next),row.revision]);
     if(!saved.rowCount){await client.query('ROLLBACK');return res.status(409).json({error:'A agenda acabou de mudar. Atualize os horários e tente novamente.'})}
-    await client.query('COMMIT');return res.status(201).json({ok:true,id:d.requestId,date:d.date,time:d.time,value:price.value,paymentChoice:d.paymentChoice||'deposit',signal:d.paymentChoice==='onsite'?0:price.value*(rules.depositPercent/100),depositPercent:rules.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}});
+    await client.query('COMMIT');
+    await notifyBooking({appointment:next.appointments.find(a=>a.id===d.requestId),client:person,businessName:next.settings.name});
+    return res.status(201).json({ok:true,id:d.requestId,date:d.date,time:d.time,value:price.value,paymentChoice:d.paymentChoice||'deposit',signal:d.paymentChoice==='onsite'?0:price.value*(rules.depositPercent/100),depositPercent:rules.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}});
   }catch(e){await client.query('ROLLBACK');throw e}finally{client.release()}
 }
 
@@ -91,6 +94,7 @@ export default async function handler(req,res){
     setCors(res);res.status(500).json({error:'Não foi possível concluir. Tente novamente.'});
   }
 }
+
 
 
 
