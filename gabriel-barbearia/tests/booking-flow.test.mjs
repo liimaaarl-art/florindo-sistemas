@@ -17,7 +17,7 @@ class Pool{
  async query(sql){if(sql.startsWith('INSERT INTO gabriel_login_limits'))return {rows:[{attempts:1}]};throw Error('Unexpected pool SQL: '+sql)}
 }
 mock.module('pg',{namedExports:{Pool}});
-mock.module('../booking-email.mjs',{namedExports:{notifyBooking:async booking=>{assert.equal(database.appointments.length,1);assert.equal(events.at(-1),'commit');events.push('email');assert.equal(booking.client.name,'Cliente teste');return {status:notificationStatus}}}});
+mock.module('../booking-email.mjs',{namedExports:{validCustomerEmail:v=>typeof v==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),notifyCustomer:async()=>({status:'sent'}),notifyBooking:async booking=>{assert.equal(database.appointments.length,1);assert.equal(events.at(-1),'commit');events.push('email');assert.equal(booking.client.name,'Cliente teste');return {status:notificationStatus}}}});
 const {default:core}=await import('../api.mjs');
 const {default:handler}=await import('../api/gabriel.mjs');
 const day=new Date(Date.now()+86400000).toISOString().slice(0,10);

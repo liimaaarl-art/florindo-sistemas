@@ -38,7 +38,7 @@ export function bookingEmail({appointment,client,businessName},config,env=proces
 }
 
 // Awaited only after COMMIT. SMTP errors must never turn a saved reservation into an error.
-export function createBookingNotifier({env=process.env,createTransport=nodemailer.createTransport,logger=console,timeoutMs=8000}={}){
+export function createBookingNotifier({env=process.env,createTransport=nodemailer.createTransport,logger=console,timeoutMs=8000,messageBuilder=bookingEmail}={}){
   return async function notifyBooking(booking){
     const config=emailConfiguration(env);
     if(!config.ready)return {status:'not_configured'};
@@ -50,7 +50,7 @@ export function createBookingNotifier({env=process.env,createTransport=nodemaile
         tls:{minVersion:'TLSv1.2',rejectUnauthorized:true}
       });
       const result=await Promise.race([
-        transport.sendMail(bookingEmail(booking,config,env)),
+        transport.sendMail(messageBuilder(booking,config,env)),
         new Promise((_,reject)=>{timer=setTimeout(()=>{const e=Error('SMTP timeout');e.code='ETIMEDOUT';reject(e)},timeoutMs)})
       ]);
       if(!result.accepted?.some(address=>String(address).toLowerCase()===config.to.toLowerCase()))throw Object.assign(Error('Recipient rejected'),{code:'ERECIPIENT'});
@@ -68,3 +68,25 @@ export function createBookingNotifier({env=process.env,createTransport=nodemaile
 }
 
 export const notifyBooking=createBookingNotifier();
+
+export function validCustomerEmail(value){
+  return typeof value==='string' && value.length<=254 && value===value.trim() && /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/.test(value) && !value.includes('..');
+}
+export function customerBookingEmail({appointment,client,businessName},config){
+  const [year,month,day]=String(appointment.date).split('-');
+  const pending=appointment.paymentChoice!=='onsite';
+  const reference=createHash('sha256').update(String(appointment.id)).digest('hex');
+  return {from:{name:singleLine(businessName)||'Gabriel Cortes',address:config.from},to:config.to,
+    subject:pending?'Pré-agendamento recebido - Gabriel Cortes':'Agendamento realizado - Gabriel Cortes',
+    messageId:`<cliente-${reference}@gmail.com>`,
+    text:[`Olá, ${singleLine(client.name)}!`,'',
+      pending?'Recebemos seu pré-agendamento. Ele ainda depende da conferência do sinal pela barbearia.':'Seu horário foi agendado. O pagamento será feito no atendimento.',
+      `Serviço: ${singleLine(appointment.service)}`,`Data: ${day}/${month}/${year}`,`Horário: ${singleLine(appointment.time)}`,
+      '','Para dúvidas ou alterações, entre em contato com a barbearia.'].join('\n')};
+}
+export async function notifyCustomer(booking,email){
+  if(!email)return {status:'not_requested'};
+  if(!validCustomerEmail(email))return {status:'invalid'};
+  const env={...process.env,BOOKING_NOTIFICATION_EMAIL:email};
+  return createBookingNotifier({env,messageBuilder:customerBookingEmail})(booking);
+}

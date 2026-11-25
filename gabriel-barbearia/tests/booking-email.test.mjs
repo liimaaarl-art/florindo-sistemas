@@ -40,3 +40,16 @@ test('SMTP travado tem prazo e conexão encerrada',async()=>{
  const notify=createBookingNotifier({env,timeoutMs:20,logger:{error(){}},createTransport(){return {sendMail(){return new Promise(()=>{})},close(){closed=true}}}});
  assert.deepEqual(await notify(booking),{status:'failed'});assert.equal(closed,true);
 });
+
+test('aviso ao cliente distingue sinal pendente de agendamento confirmado',async()=>{
+ const {customerBookingEmail,validCustomerEmail}=await import('../booking-email.mjs');
+ const config={from:'sender@gmail.com',to:'cliente@example.com'};
+ const pending=customerBookingEmail(booking,config);
+ assert.match(pending.text,/ainda depende da conferência/);
+ assert.doesNotMatch(pending.text,/admin\.html|Telefone:|Observações:/);
+ assert.equal(pending.to,'cliente@example.com');
+ const onsite=customerBookingEmail({...booking,appointment:{...booking.appointment,paymentChoice:'onsite'}},config);
+ assert.match(onsite.text,/pagamento será feito no atendimento/);
+ assert.equal(validCustomerEmail('a@example.com\nBcc: x@example.com'),false);
+ assert.equal(validCustomerEmail('a@example.com'),true);
+});

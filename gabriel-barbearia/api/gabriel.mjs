@@ -2,7 +2,7 @@ import core from '../api.mjs';
 import {Pool} from 'pg';
 import {randomBytes,createHash} from 'node:crypto';
 import {validate,phone,active,validDate} from '../validation.mjs';
-import {notifyBooking} from '../booking-email.mjs';
+import {notifyBooking,notifyCustomer,validCustomerEmail} from '../booking-email.mjs';
 
 const pool=new Pool({connectionString:process.env.DATABASE_URL,max:2,ssl:{rejectUnauthorized:true}});
 const hash=v=>createHash('sha256').update(v).digest('hex');
@@ -34,7 +34,8 @@ async function publicAvailability(res){
 async function publicBook(req,res){
   const d=typeof req.body==='string'?JSON.parse(req.body):req.body||{};
   if(typeof d.name!=='string'||!d.name.trim()||d.name.length>80||typeof d.phone!=='string'||d.phone.length>25||typeof d.service!=='string'||!d.service.trim()||d.service.length>80||typeof d.requestId!=='string'||!/^[a-zA-Z0-9-]{20,100}$/.test(d.requestId)||typeof (d.note??'')!=='string'||String(d.note??'').length>300)return res.status(400).json({error:'Preencha os dados corretamente.'});
-  if(d.paymentChoice!==undefined&&!['deposit','onsite'].includes(d.paymentChoice))return res.status(400).json({error:'Escolha uma forma de pagamento válida.'});
+  if(d.email!==undefined&&d.email!==''&&!validCustomerEmail(d.email))return res.status(400).json({error:'Informe um e-mail válido.'});
+      if(d.paymentChoice!==undefined&&!['deposit','onsite'].includes(d.paymentChoice))return res.status(400).json({error:'Escolha uma forma de pagamento válida.'});
       const tel=phone(d.phone);if(!tel)return res.status(400).json({error:'Informe um telefone válido com DDD.'});
   const n=nowSP(),today=n.year+'-'+n.month+'-'+n.day,nowTime=n.hour+':'+n.minute;const last=new Date(today+'T12:00:00Z');last.setUTCDate(last.getUTCDate()+90);
   if(typeof d.date!=='string'||!validDate(d.date)||d.date<today||d.date>last.toISOString().slice(0,10)||typeof d.time!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(d.time)||(d.date===today&&d.time<=nowTime))return res.status(400).json({error:'Escolha uma data e horário futuros, nos próximos 90 dias.'});
@@ -61,8 +62,9 @@ async function publicBook(req,res){
     const saved=await client.query('UPDATE gabriel_demo_state SET data=$1::jsonb,revision=revision+1,updated_at=now() WHERE id=1 AND revision=$2 RETURNING revision',[JSON.stringify(next),row.revision]);
     if(!saved.rowCount){await client.query('ROLLBACK');return res.status(409).json({error:'A agenda acabou de mudar. Atualize os horários e tente novamente.'})}
     await client.query('COMMIT');
-    await notifyBooking({appointment:next.appointments.find(a=>a.id===d.requestId),client:person,businessName:next.settings.name});
-    return res.status(201).json({ok:true,id:d.requestId,date:d.date,time:d.time,value:price.value,paymentChoice:d.paymentChoice||'deposit',signal:d.paymentChoice==='onsite'?0:price.value*(rules.depositPercent/100),depositPercent:rules.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}});
+    const bookingNotice={appointment:next.appointments.find(a=>a.id===d.requestId),client:{...person,name:d.name.trim()},businessName:next.settings.name};
+    const [,customerNotice]=await Promise.all([notifyBooking(bookingNotice),notifyCustomer(bookingNotice,d.email)]);
+    return res.status(201).json({customerEmailStatus:customerNotice.status,ok:true,id:d.requestId,date:d.date,time:d.time,value:price.value,paymentChoice:d.paymentChoice||'deposit',signal:d.paymentChoice==='onsite'?0:price.value*(rules.depositPercent/100),depositPercent:rules.depositPercent,business:{phone:phone(next.settings.phone),pix:next.settings.pix,name:next.settings.name}});
   }catch(e){await client.query('ROLLBACK');throw e}finally{client.release()}
 }
 
